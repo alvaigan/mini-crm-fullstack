@@ -1,8 +1,13 @@
 <?php
 
+use App\Http\Controllers\ContactsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::prefix('/contacts')->group(function() {
+    Route::resource('/', ContactsController::class);
+});
+
+Route::prefix('/call-logs')->group(function() {
+    Route::get('/', [ContactsController::class, 'call_logs_list']);
+});

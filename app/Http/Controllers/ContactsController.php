@@ -11,7 +11,17 @@ class ContactsController extends Controller
      */
     public function index()
     {
-        //
+        $result = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $result[] = [
+                "id" => $i,
+                "name" => "custom name " . $i,
+                "phone" => "6122222222" . $i,
+                "role" => "employee",
+            ];
+        }
+
+        return response()->json($result);
     }
 
     /**
@@ -60,5 +70,27 @@ class ContactsController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function call_logs_list() {
+        $result = [];
+        for ($i = 1; $i <= 10; $i++) {
+
+            $status = "Completed";
+
+            if ($i % 2 == 0) {
+                $status = "Missed";
+            }
+
+            $result[] = [
+                "id" => $i,
+                "name" => "custom name " . $i,
+                "timestamp" => "6122222222" . $i,
+                "duration" => $i . " minutes",
+                "status" => $status,
+            ];
+        }
+
+        return response()->json($result);
     }
 }
