@@ -2,26 +2,49 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contacts;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ContactsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $result = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $result[] = [
-                "id" => $i,
-                "name" => "custom name " . $i,
-                "phone" => "6122222222" . $i,
-                "role" => "employee",
-            ];
+        $statusCode = 200;
+        $result = [
+            'message' => 'ok',
+            'data' => [],
+        ];
+
+        $role = $request->query('role') ?? null;
+        $company = $request->query('company') ?? null;
+
+        try {
+            $data = Contacts::with('role');
+
+            if ($role != null) {
+                $data = $data->where('role_id',  $role);
+            }
+
+            if ($company != null) {
+                $data = $data->where('company', 'like', "%". $company ."%");
+            }
+
+            $data = $data->get();
+
+            $result['data'] = $data;
+        } catch (Exception $e) {
+            Log::error($e);
+            $result = [];
+            $result['message'] = $e->getMessage();
+            $result['data'] = $e->getCode();
         }
 
-        return response()->json($result);
+        return response()->json($result, $statusCode);
     }
 
     /**

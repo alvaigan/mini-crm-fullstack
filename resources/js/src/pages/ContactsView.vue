@@ -1,45 +1,86 @@
 <script>
-import { PhTrash, PhPlus } from "phosphor-vue";
+import { PhTrash, PhPlus, PhPencilSimple, PhPhone } from "phosphor-vue";
 import DefaultPage from "../components/DefaultPage.vue";
+import { mapState } from "vuex";
+import queryString from "query-string";
+import { useDebounce } from "../utils/helpers.js";
 
-const roles = [
-    {
-        name: "all",
-        label: "All Roles",
-    },
-    {
-        name: "product-manager",
-        label: "Product Manager",
-    },
-    {
-        name: "project-manager",
-        label: "Project Manager",
-    },
-    {
-        name: "staff",
-        label: "Staff",
-    },
-    {
-        name: "ceo",
-        label: "CEO",
-    },
-    {
-        name: "team-leader",
-        label: "Team Leader",
-    },
-];
+const changeQueryParams = (key, val) => {
+    const searchURL = new URL(window.location);
+    searchURL.searchParams.set(key, val);
+    if (val == 0 || val == "") {
+        searchURL.searchParams.delete(key);
+    }
+    window.history.pushState({}, "", searchURL);
+
+    return window.location.href;
+};
 
 export default {
     components: {
         PhTrash,
         PhPlus,
+        PhPencilSimple,
+        PhPhone,
         DefaultPage,
     },
+    computed: {
+        ...mapState({
+            roles: (state) => state.roles.roles,
+            contacts: (state) => state.contacts.contacts,
+        }),
+    },
     data: () => ({
-        roles: roles,
         selectedRoleValue: "",
         companyValue: "",
+        allCheck: false,
+        selected: [],
+        chooseRolePH: "Choose Role",
+        url: "",
     }),
+    watch: {
+        roles: (newVal) => {
+            console.log(newVal);
+        },
+        companyValue: useDebounce(function (val) {
+            const newUrl = changeQueryParams("company", val);
+            this.url = newUrl;
+        }, 500),
+        selectedRoleValue: function (val) {
+            const newUrl = changeQueryParams("role", val);
+            this.url = newUrl;
+        },
+        url: function (val) {
+            console.log(val);
+            let query = val.split("?");
+            if (query.length > 1) {
+                query = query[1];
+            }
+
+            const parseQuery = queryString.parse(query);
+
+            console.log(Object.keys(parseQuery).length);
+
+            if (Object.keys(parseQuery).length !== 0) {
+                this.$store.dispatch("contacts/getAllContacts", parseQuery);
+            } else {
+                this.$store.dispatch("contacts/getAllContacts");
+            }
+        },
+    },
+    methods: {
+        handleSearchCompany: function (e) {
+            // console.log(e);
+            // setTimeout(() => {
+            // }, 500);
+        },
+    },
+    created() {
+        this.$store.dispatch("contacts/getAllContacts");
+        this.$store.dispatch("roles/getAllRoles");
+
+        this.url = window.location.href;
+    },
 };
 </script>
 
@@ -47,7 +88,7 @@ export default {
     <DefaultPage title="Contacts" title-desc="List of Contacts" :action="true">
         <template v-slot:action>
             <div class="flex flex-row justify-center items-center">
-                <vs-button danger :active="active == 1" @click="active = 1">
+                <vs-button danger>
                     <PhTrash weight="duotone" class="me-1" /> Delete
                 </vs-button>
             </div>
@@ -63,20 +104,25 @@ export default {
                 />
 
                 <vs-select
-                    placeholder="Choose Role"
+                    :placeholder="chooseRolePH"
                     state="primary"
                     color="primary"
                     v-model="selectedRoleValue"
+                    v-if="roles.length > 0"
                 >
+                    <vs-option :key="0" label="" :value="0"> All </vs-option>
+
                     <vs-option
-                        v-for="role in roles"
+                        v-for="(role, index) in roles"
+                        :key="(index += 1)"
                         :label="role.label"
-                        :value="role.name"
-                        >{{ role.label }}</vs-option
+                        :value="role.id"
                     >
+                        {{ role.label }}
+                    </vs-option>
                 </vs-select>
 
-                <vs-button :active="active == 1" @click="active = 1">
+                <vs-button>
                     <PhPlus weight="duotone" class="me-1" />
                     Add New
                 </vs-button>
@@ -84,9 +130,64 @@ export default {
         </template>
 
         <template v-slot:content>
-            <div>Contacts</div>
-            <div>{{ companyValue }}</div>
-            <div>{{ selectedRoleValue }}</div>
+            <vs-table v-model="selected">
+                <template #thead>
+                    <vs-tr>
+                        <vs-th class="w-5">
+                            <vs-checkbox
+                                :indeterminate="
+                                    selected.length == contacts.length
+                                "
+                                v-model="allCheck"
+                                @change="
+                                    selected = $vs.checkAll(selected, contacts)
+                                "
+                            />
+                        </vs-th>
+                        <vs-th> Name </vs-th>
+                        <vs-th> Phone Number </vs-th>
+                        <vs-th> Company Name </vs-th>
+                        <vs-th> Role </vs-th>
+                        <vs-th> Action </vs-th>
+                    </vs-tr>
+                </template>
+                <template #tbody>
+                    <vs-tr
+                        :key="i"
+                        v-for="(tr, i) in contacts"
+                        :data="tr"
+                        :is-selected="!!selected.includes(tr)"
+                        v-if="contacts.length > 0"
+                    >
+                        <vs-td checkbox>
+                            <vs-checkbox :val="tr" v-model="selected" />
+                        </vs-td>
+                        <vs-td>
+                            {{ tr.name }}
+                        </vs-td>
+                        <vs-td>
+                            {{ tr.phone }}
+                        </vs-td>
+                        <vs-td>
+                            {{ tr.company }}
+                        </vs-td>
+                        <vs-td>
+                            {{ tr.role.label }}
+                        </vs-td>
+                        <vs-td>
+                            <div class="flex flex-row justify-center">
+                                <vs-button warn size="large">
+                                    <PhPencilSimple weight="duotone" />
+                                </vs-button>
+
+                                <vs-button success size="large">
+                                    <PhPhone weight="duotone" />
+                                </vs-button>
+                            </div>
+                        </vs-td>
+                    </vs-tr>
+                </template>
+            </vs-table>
         </template>
     </DefaultPage>
 </template>

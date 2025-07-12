@@ -16,8 +16,12 @@
     },
     "dependencies": {
         "@vitejs/plugin-vue2": "^2.3.3",
+        "es6-promise": "^4.2.8",
         "phosphor-vue": "^1.4.2",
+        "query-string": "^9.2.2",
         "vue": "^2.7.16",
-        "vuesax": "^4.0.1-alpha.25"
+        "vue2-debounce": "^1.0.1",
+        "vuesax": "^4.0.1-alpha.25",
+        "vuex": "^3.6.2"
     }
 }
