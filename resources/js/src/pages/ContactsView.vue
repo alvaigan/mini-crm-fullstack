@@ -1,6 +1,7 @@
 <script>
 import { PhTrash, PhPlus, PhPencilSimple, PhPhone } from "phosphor-vue";
 import DefaultPage from "../components/DefaultPage.vue";
+import CallingDialog from "../components/CallingDialog.vue";
 import { mapState } from "vuex";
 import queryString from "query-string";
 import { useDebounce } from "../utils/helpers.js";
@@ -23,11 +24,27 @@ export default {
         PhPencilSimple,
         PhPhone,
         DefaultPage,
+        CallingDialog,
     },
     computed: {
         ...mapState({
             roles: (state) => state.roles.roles,
-            contacts: (state) => state.contacts.contacts,
+            contacts: (state) => {
+                let data = state.contacts.contacts;
+
+                let mockContact = [];
+                for (let [i, item] of data.entries()) {
+                    if (i % 2 == 0) {
+                        item.isCall = true;
+                    } else {
+                        item.isCall = false;
+                    }
+
+                    mockContact.push(item);
+                }
+
+                return mockContact;
+            },
         }),
     },
     data: () => ({
@@ -37,6 +54,8 @@ export default {
         selected: [],
         chooseRolePH: "Choose Role",
         url: "",
+        show: false,
+        contactDial: {},
     }),
     watch: {
         roles: (newVal) => {
@@ -69,10 +88,9 @@ export default {
         },
     },
     methods: {
-        handleSearchCompany: function (e) {
-            // console.log(e);
-            // setTimeout(() => {
-            // }, 500);
+        handleCalling: function (contactData) {
+            this.contactDial = contactData;
+            this.show = !this.show;
         },
     },
     created() {
@@ -180,7 +198,11 @@ export default {
                                     <PhPencilSimple weight="duotone" />
                                 </vs-button>
 
-                                <vs-button success size="large">
+                                <vs-button
+                                    success
+                                    size="large"
+                                    @click="() => handleCalling(tr)"
+                                >
                                     <PhPhone weight="duotone" />
                                 </vs-button>
                             </div>
@@ -188,6 +210,8 @@ export default {
                     </vs-tr>
                 </template>
             </vs-table>
+
+            <CallingDialog v-model="show" :contact-dial="contactDial" />
         </template>
     </DefaultPage>
 </template>

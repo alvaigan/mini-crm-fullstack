@@ -73,7 +73,8 @@ export default {
                     v-model="selectedRoleValue"
                 >
                     <vs-option
-                        v-for="role in roles"
+                        v-for="(role, index) in roles"
+                        :key="index"
                         :label="role.label"
                         :value="role.name"
                         >{{ role.label }}</vs-option
