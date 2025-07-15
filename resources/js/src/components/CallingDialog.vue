@@ -43,18 +43,6 @@ export default {
             get() {
                 return this.contactDial;
             },
-            // set() {
-            //     console.log(this.contactDial);
-            //     if (this.contactDial.isCall) {
-            //         setTimeout(() => {
-            //             this.callingStatus = CALLING_STATUS.active;
-            //         }, 2000);
-            //     } else {
-            //         setTimeout(() => {
-            //             this.callingStatus = CALLING_STATUS.noAnswer;
-            //         }, 2000);
-            //     }
-            // },
         },
     },
     watch: {
@@ -102,6 +90,7 @@ export default {
             }
         },
         closeDialog: function () {
+            this.storeCallLog();
             this.callingStatus = CALLING_STATUS.endCall;
             setTimeout(() => {
                 this.show = !this.show;
@@ -113,6 +102,29 @@ export default {
         },
         callingTime: function (data) {
             this.fullCallingTime = data;
+        },
+        storeCallLog() {
+            var payloads = {
+                contact_name: "",
+                duration: "",
+                status: "",
+            };
+
+            console.log("storeCallLog", this.callingStatus);
+
+            if (
+                this.callingStatus.name == "active" ||
+                this.callingStatus.name == "no-answer"
+            ) {
+                payloads.contact_name = this.contact?.name ?? "-";
+                payloads.duration = this.fullCallingTime ?? "00:00:00";
+                payloads.status =
+                    this.callingStatus?.name == "active"
+                        ? "Completed"
+                        : "Missed";
+
+                this.$store.dispatch("contacts/createCallLog", payloads);
+            }
         },
     },
 };

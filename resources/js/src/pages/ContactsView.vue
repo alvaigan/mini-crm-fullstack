@@ -1,5 +1,12 @@
 <script>
-import { PhTrash, PhPlus, PhPencilSimple, PhPhone } from "phosphor-vue";
+import {
+    PhTrash,
+    PhPlus,
+    PhPencilSimple,
+    PhPhone,
+    PhStar,
+    PhFolderSimpleStar,
+} from "phosphor-vue";
 import DefaultPage from "../components/DefaultPage.vue";
 import CallingDialog from "../components/CallingDialog.vue";
 import { mapState } from "vuex";
@@ -23,6 +30,8 @@ export default {
         PhPlus,
         PhPencilSimple,
         PhPhone,
+        PhStar,
+        PhFolderSimpleStar,
         DefaultPage,
         CallingDialog,
     },
@@ -58,6 +67,9 @@ export default {
         contactDial: {},
     }),
     watch: {
+        selected: function (val) {
+            console.log(val);
+        },
         roles: (newVal) => {
             console.log(newVal);
         },
@@ -92,6 +104,10 @@ export default {
             this.contactDial = contactData;
             this.show = !this.show;
         },
+        toggleFavorite: function (id) {
+            this.$store.dispatch("contacts/toggleFavorite", id);
+            this.$store.dispatch("contacts/getAllContacts");
+        },
     },
     created() {
         this.$store.dispatch("contacts/getAllContacts");
@@ -105,62 +121,30 @@ export default {
 <template>
     <DefaultPage title="Contacts" title-desc="List of Contacts" :action="true">
         <template v-slot:action>
-            <div class="flex flex-row justify-center items-center">
-                <vs-button danger>
-                    <PhTrash weight="duotone" class="me-1" /> Delete
-                </vs-button>
-            </div>
+            <div class="flex flex-row justify-center items-center"></div>
 
             <div class="flex flex-row justify-center items-center gap-2">
                 <span>Filters:</span>
 
-                <vs-input
-                    v-model="companyValue"
-                    state="primary"
-                    placeholder="Type Company"
-                    type="search"
-                />
+                <vs-input v-model="companyValue" state="primary" placeholder="Type Company" type="search" />
 
-                <vs-select
-                    :placeholder="chooseRolePH"
-                    state="primary"
-                    color="primary"
-                    v-model="selectedRoleValue"
-                    v-if="roles.length > 0"
-                >
+                <vs-select :placeholder="chooseRolePH" state="primary" color="primary" v-model="selectedRoleValue"
+                    v-if="roles.length > 0">
                     <vs-option :key="0" label="" :value="0"> All </vs-option>
 
-                    <vs-option
-                        v-for="(role, index) in roles"
-                        :key="(index += 1)"
-                        :label="role.label"
-                        :value="role.id"
-                    >
+                    <vs-option v-for="(role, index) in roles" :key="(index += 1)" :label="role.label" :value="role.id">
                         {{ role.label }}
                     </vs-option>
                 </vs-select>
-
-                <vs-button>
-                    <PhPlus weight="duotone" class="me-1" />
-                    Add New
-                </vs-button>
             </div>
         </template>
 
         <template v-slot:content>
-            <vs-table v-model="selected">
+            <vs-table>
                 <template #thead>
                     <vs-tr>
                         <vs-th class="w-5">
-                            <vs-checkbox
-                                :indeterminate="
-                                    selected.length == contacts.length
-                                "
-                                v-model="allCheck"
-                                @change="
-                                    selected = $vs.checkAll(selected, contacts)
-                                "
-                            />
+                            <PhFolderSimpleStar :size="32" weight="fill" color="#ffbb00" />
                         </vs-th>
                         <vs-th> Name </vs-th>
                         <vs-th> Phone Number </vs-th>
@@ -170,15 +154,12 @@ export default {
                     </vs-tr>
                 </template>
                 <template #tbody>
-                    <vs-tr
-                        :key="i"
-                        v-for="(tr, i) in contacts"
-                        :data="tr"
-                        :is-selected="!!selected.includes(tr)"
-                        v-if="contacts.length > 0"
-                    >
-                        <vs-td checkbox>
-                            <vs-checkbox :val="tr" v-model="selected" />
+                    <vs-tr :key="i" v-for="(tr, i) in contacts" :data="tr" v-if="contacts.length > 0">
+                        <vs-td>
+                            <PhStar v-if="tr.is_favorite == true" :size="32" weight="duotone" color="#ffbb00"
+                                @click="() => toggleFavorite(tr.id)" />
+                            <PhStar v-else :size="32" weight="duotone" color="#333333"
+                                @click="() => toggleFavorite(tr.id)" />
                         </vs-td>
                         <vs-td>
                             {{ tr.name }}
@@ -194,15 +175,7 @@ export default {
                         </vs-td>
                         <vs-td>
                             <div class="flex flex-row justify-center">
-                                <vs-button warn size="large">
-                                    <PhPencilSimple weight="duotone" />
-                                </vs-button>
-
-                                <vs-button
-                                    success
-                                    size="large"
-                                    @click="() => handleCalling(tr)"
-                                >
+                                <vs-button success size="large" @click="() => handleCalling(tr)">
                                     <PhPhone weight="duotone" />
                                 </vs-button>
                             </div>

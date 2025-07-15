@@ -25,7 +25,7 @@ class ContactsSeeder extends Seeder
                     'name' => $name,
                     'company' => $company,
                     'role_id' => $role->id,
-                    'phone' => $phone, // <- Important to include
+                    'phone' => $phone,
                     'updated_at' => $now,
                     'created_at' => $now,
                 ]

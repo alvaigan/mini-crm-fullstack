@@ -1,11 +1,12 @@
 <script>
-import { PhHouse, PhAddressBook, PhPhone } from "phosphor-vue";
+import { PhHouse, PhAddressBook, PhPhone, PhDeviceMobile } from "phosphor-vue";
 
 export default {
     components: {
         PhHouse,
         PhAddressBook,
         PhPhone,
+        PhDeviceMobile,
     },
     data: () => ({
         active: "home",
@@ -17,7 +18,10 @@ export default {
     <div class="w-[400px]">
         <vs-sidebar relative v-model="active" class="w-full" open>
             <template #logo>
-                <img src="/asset/images/callon.png" />
+                <div class="my-5 flex flex-row items-center">
+                    <PhDeviceMobile :size="40" color="#185BFF" weight="duotone" />
+                    <span class="text-2xl font-bold text-[#185BFF]">CallnMe</span>
+                </div>
             </template>
             <vs-sidebar-item id="home" to="/">
                 <template #icon>

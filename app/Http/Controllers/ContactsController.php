@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CallLogs;
 use App\Models\Contacts;
 use Exception;
 use Illuminate\Http\Request;
@@ -22,19 +23,27 @@ class ContactsController extends Controller
 
         $role = $request->query('role') ?? null;
         $company = $request->query('company') ?? null;
+        $is_favorite = $request->query('is_favorite') ?? null;
+
 
         try {
             $data = Contacts::with('role');
 
             if ($role != null) {
-                $data = $data->where('role_id',  $role);
+                $data = $data->where('role_id', $role);
             }
 
             if ($company != null) {
-                $data = $data->where('company', 'like', "%". $company ."%");
+                $data = $data->where('company', 'like', '%' . $company . '%');
             }
 
-            $data = $data->get();
+            if ($is_favorite != null) {
+                $is_favorite = filter_var($is_favorite, FILTER_VALIDATE_BOOLEAN);
+
+                $data = $data->where('is_favorite', $is_favorite);
+            }
+
+            $data = $data->orderBy('name', 'asc')->get();
 
             $result['data'] = $data;
         } catch (Exception $e) {
@@ -95,25 +104,94 @@ class ContactsController extends Controller
         //
     }
 
-    public function call_logs_list() {
-        $result = [];
-        for ($i = 1; $i <= 10; $i++) {
+    public function call_logs_list(Request $request)
+    {
+        $statusCode = 200;
+        $result = [
+            'message' => 'ok',
+            'data' => [],
+        ];
 
-            $status = "Completed";
+        $from = $request->query('from') ?? null;
+        $to = $request->query('to') ?? null;
 
-            if ($i % 2 == 0) {
-                $status = "Missed";
+        try {
+            $data = CallLogs::query();
+
+            if (! empty($from) && ! empty($to)) {
+                $data = $data->whereBetween('created_at', [$from, $to]);
             }
 
-            $result[] = [
-                "id" => $i,
-                "name" => "custom name " . $i,
-                "timestamp" => "6122222222" . $i,
-                "duration" => $i . " minutes",
-                "status" => $status,
-            ];
+            $data = $data->get();
+
+            $result['data'] = $data;
+        } catch (Exception $e) {
+            Log::error($e);
+            $result = [];
+            $result['message'] = $e->getMessage();
+            $result['data'] = $e->getCode();
         }
 
-        return response()->json($result);
+        return response()->json($result, $statusCode);
+    }
+
+    public function add_call_log(Request $request)
+    {
+        $contact = $request->input('contact_name');
+        $duration = $request->input('duration');
+        $status = $request->input('status');
+
+        $statusCode = 200;
+        $result = [
+            'message' => 'ok',
+            'data' => [],
+        ];
+
+        try {
+            $call_log = CallLogs::create(
+                [
+                    'contact_name' => $contact,
+                    'duration' => $duration,
+                    'status' => $status,
+                ]
+            );
+
+            $result['data'] = $call_log;
+        } catch (Exception $e) {
+            Log::error($e);
+            $result = [];
+            $result['message'] = $e->getMessage();
+            $result['data'] = $e->getCode();
+            $statusCode = 500;
+        }
+
+        return response()->json($result, $statusCode);
+    }
+
+    public function toggle_favorite($id)
+    {
+        $statusCode = 200;
+        $result = [
+            'message' => 'ok',
+            'data' => [],
+        ];
+
+        try {
+            $contact = Contacts::find($id);
+
+            $contact->is_favorite = !$contact->is_favorite;
+
+            $contact->save();
+
+            $result['data'] = $contact;
+        } catch (Exception $e) {
+            Log::error($e);
+            $result = [];
+            $result['message'] = $e->getMessage();
+            $result['data'] = $e->getCode();
+            $statusCode = 500;
+        }
+
+        return response()->json($result, $statusCode);
     }
 }

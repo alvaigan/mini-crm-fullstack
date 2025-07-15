@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string("phone");
             $table->string("company");
             $table->integer("role_id");
+            $table->boolean("is_favorite")->default(false);
             $table->timestamps();
         });
     }
