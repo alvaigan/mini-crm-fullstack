@@ -23,8 +23,9 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-
 COPY . /var/www/html
+
+COPY env.development .env
 
 COPY --chown=www-data:www-data . /var/www/html
 
@@ -32,7 +33,9 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-RUN mv env.development /var/www/html/.env
+# RUN mv env.development /var/www/html/.env
+# RUN mv /var/www/html/env.development /var/www/html/.env
+
 
 RUN composer install --no-dev --optimize-autoloader
 

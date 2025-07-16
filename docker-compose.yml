@@ -5,7 +5,7 @@ services:
     app:
         build:
             context: .
-            dockerfile: Dockerfile.php
+            dockerfile: php.Dockerfile
         container_name: mini-crm-app
         environment:
             - DB_HOST=mysql
@@ -30,7 +30,7 @@ services:
     frontend:
         build:
             context: .
-            dockerfile: Dockerfile.node
+            dockerfile: node.Dockerfile
         container_name: mini-crm-frontend
         restart: unless-stopped
         working_dir: /app
