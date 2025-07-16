@@ -1,61 +1,207 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CALL ONMini CRM 
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern Customer Relationship Management (CRM) application built with Laravel and Vue.js, designed for efficient contact management and call tracking.
 
-## About Laravel
+## Table of Contents
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Docker Setup](#docker-setup)
+- [Project Structure](#project-structure)
+- [API Endpoints](#api-endpoints)
+- [Assumptions](#assumptions)
+- [Development Notes](#development-notes)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Overview
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+This mini-CRM system provides a clean and intuitive interface for managing business contacts and tracking call logs. It follows a modern full-stack approach with a Laravel backend API and Vue.js frontend, all containerized using Docker for easy deployment and development.
 
-## Learning Laravel
+## Architecture
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Backend (Laravel 12 + PHP 8.2)
+- **Framework**: Laravel 12 with PHP 8.2
+- **Database**: MySQL 8.0
+- **Authentication**: Laravel Sanctum (configured)
+- **API**: RESTful JSON API
+- **ORM**: Eloquent
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Frontend (Vue.js 2 + Vite)
+- **Framework**: Vue.js 2.7
+- **Build Tool**: Vite 6.3
+- **Styling**: TailwindCSS 4.0
+- **State Management**: Vuex 3.6
+- **UI Components**: Vuesax, Phosphor Vue icons
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Infrastructure
+- **Containerization**: Docker + Docker Compose
+- **Database**: MySQL 8.0 with persistent volumes
+- **Development**: Hot reload for both frontend and backend
 
-## Laravel Sponsors
+## Features
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Contact Management**
+  - Create, read, update, delete contacts
+  - Contact details: name, phone, company, role
+  - Favorite contacts functionality
+  - Role-based contact categorization
 
-### Premium Partners
+- **Call Logging**
+  - Track call duration and status
+  - Associate calls with contacts
+  - Call history management
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Real-time Interface**
+  - Live call timer functionality
+  - Interactive calling dialog
+  - Responsive dashboard layout
 
-## Contributing
+## Docker Setup
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Prerequisites
 
-## Code of Conduct
+- Docker (20.0+)
+- Docker Compose (2.0+)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Quick Start
 
-## Security Vulnerabilities
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd mini-crm-backend
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. **Start the application**
+   ```bash
+   docker-compose up -d
+   ```
 
-## License
+3. **Initialize the database**
+   ```bash
+   # Wait for containers to be ready, then run migrations
+   docker exec mini-crm-app php artisan migrate --seed
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+4. **Access the application**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:8000
+   - Database: localhost:3307
+
+### Services
+
+| Service | Container Name | Port | Description |
+|---------|---------------|------|-------------|
+| **app** | mini-crm-app | 8000 | Laravel backend API |
+| **frontend** | mini-crm-frontend | 5173 | Vue.js frontend |
+| **mysql** | mini-crm-mysql | 3307 | MySQL database |
+
+### Docker Configuration
+
+- **PHP Container**: PHP 8.2-FPM with all necessary extensions
+- **Node Container**: Node.js 18 Alpine for optimal performance
+- **MySQL Container**: MySQL 8.0 with persistent data volume
+- **Network**: Isolated bridge network for inter-service communication
+
+### Environment Variables
+
+The PHP container automatically creates a `.env` file with these settings:
+
+```env
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=mini_crm
+DB_USERNAME=mini_crm_user
+DB_PASSWORD=mini_crm_password
+```
+
+## Project Structure
+
+```
+mini-crm-backend/
+├── app/
+│   ├── Http/Controllers/     # API Controllers
+│   └── Models/              # Eloquent Models
+├── database/
+│   ├── migrations/          # Database schema
+│   └── seeders/            # Test data seeders
+├── resources/js/
+│   ├── src/
+│   │   ├── components/     # Vue components
+│   │   ├── pages/         # Vue pages
+│   │   ├── stores/        # Vuex stores
+│   │   └── api/           # API client
+│   └── App.vue            # Root component
+├── routes/api.php          # API routes
+├── docker-compose.yml      # Container orchestration
+├── Dockerfile.php         # PHP container config
+└── Dockerfile.node        # Node container config
+```
+
+## API Endpoints
+
+### Contacts
+- `GET /api/contacts/` - List all contacts
+- `POST /api/contacts/` - Create new contact
+- `PUT /api/contacts/{id}` - Update contact
+- `DELETE /api/contacts/{id}` - Delete contact
+- `POST /api/contacts/{id}/toggle-favorite` - Toggle favorite status
+
+### Call Logs
+- `GET /api/call-logs/` - List call logs
+- `POST /api/call-logs/` - Create call log
+
+### Roles
+- `GET /api/roles/` - List available roles
+
+## Assumptions
+
+### Technical Assumptions
+- **Environment**: Development-focused setup with debug enabled
+- **Database**: MySQL is sufficient for the scale and requirements
+- **Authentication**: Sanctum is configured but not implemented in current UI
+- **Scaling**: Single-instance deployment suitable for current scope
+
+### Business Logic Assumptions
+- **Contact Uniqueness**: No built-in duplicate detection (assumed to be handled by business process)
+- **Call Status**: Simple string-based status tracking (e.g., "completed", "missed", "ongoing")
+- **Roles**: Static role system via database seeding
+- **Data Persistence**: All data stored in MySQL with standard Laravel timestamps
+
+### Frontend Assumptions
+- **Browser Support**: Modern browsers with ES6+ support
+- **Mobile**: Responsive design but desktop-first approach
+- **Real-time**: Call timer is client-side only (no server-side call state tracking)
+
+### Infrastructure Assumptions
+- **Deployment**: Docker-based deployment environment
+- **Storage**: Local file system storage (no cloud storage integration)
+- **Caching**: Database-based caching for simplicity
+- **Sessions**: Database session storage for multi-container compatibility
+
+## Development Notes
+
+### Hot Reload
+Both frontend and backend support hot reload during development:
+- **Vite**: Automatically reloads frontend changes
+- **Laravel**: File changes are reflected immediately via volume mounts
+
+### Database Seeding
+The project includes seeders for roles and sample contacts:
+```bash
+docker exec mini-crm-app php artisan db:seed
+```
+
+### Logs
+Access application logs:
+```bash
+docker logs mini-crm-app      # Laravel logs
+docker logs mini-crm-frontend # Frontend build logs
+docker logs mini-crm-mysql    # Database logs
+```
+
+### Troubleshooting
+- Ensure ports 3307, 5173, and 8000 are available
+- Wait for MySQL to fully initialize before running migrations
+- Check container health: `docker-compose ps`
+
+---

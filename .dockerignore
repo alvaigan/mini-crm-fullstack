@@ -10,7 +10,7 @@ vendor
 .env
 .env.local
 .env.*.local
-!env.development
+#env.development
 
 # Log files
 npm-debug.log*
@@ -103,4 +103,4 @@ public/build
 
 # Docker files
 Dockerfile*
-docker-compose* 
+docker-compose*
