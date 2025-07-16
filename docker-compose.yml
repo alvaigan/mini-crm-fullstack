@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # PHP/Laravel Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+    container_name: mini-crm-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    ports:
+      - "8000:8000"
+    networks:
+      - mini-crm-network
+    depends_on:
+      - mysql
+
+  # Vue2/Node.js Service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: mini-crm-frontend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    networks:
+      - mini-crm-network
+    command: npm run dev
+    environment:
+      - VITE_HOST=0.0.0.0
+      - VITE_PORT=5173
+
+  # MySQL Service
+  mysql:
+    image: mysql:8.0
+    container_name: mini-crm-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: mini_crm
+      MYSQL_USER: mini_crm_user
+      MYSQL_PASSWORD: mini_crm_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mini-crm-network
+
+networks:
+  mini-crm-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local 
