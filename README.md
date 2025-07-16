@@ -83,9 +83,8 @@ This mini-CRM system provides a clean and intuitive interface for managing busin
    ```
 
 4. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:8000
-   - Database: localhost:3307
+   - App: http://localhost:8000
+   - Database: localhost:3306
 
 ### Services
 
